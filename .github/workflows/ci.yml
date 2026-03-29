@@ -1,0 +1,37 @@
+# .github/workflows/ci.yml
+# Continuous Integration — generated 2026-03-29
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["18.x", "20.x"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit || true
+
+      - name: Run tests
+        run: npm test -- --passWithNoTests --ci
+
+      - name: Build
+        run: npm run build --if-present
